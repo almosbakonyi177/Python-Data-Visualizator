@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 df=None
 variables=[]
-plotTypes=['Line plot', 'Scatter plot']
+plotTypes=['Line plot', 'Scatter plot', 'Bar Chart']
 
 def importFile():
     path=filedialog.askopenfilename(title='Select the file', filetypes=[('CSV files', '*.csv')])
@@ -41,12 +41,12 @@ def updateVariablesInScrollbar(variables, scrollbar):
     
 
 def createChart(event):
+
     if df is None:
         return
-    if not variable1.get() or not variable2.get():
+    if not variable1.get() or not variable2.get() or not plotType.get():
         return
     
-    print('Ize')
     type=plotType.get()
     x_vars=df[variable1.get()]
     y_vars=df[variable2.get()]
@@ -54,8 +54,10 @@ def createChart(event):
     match type:
         case 'Line plot':
             createLinePlot(x_vars, y_vars)
+        case 'Bar Chart':
+            createBarChart(x_vars, y_vars)
         case _:
-            createLinePlot(x_vars, y_vars)
+            createScatterPlot(x_vars, y_vars)
             
 
 def createLinePlot(x_vars, y_vars):
@@ -65,7 +67,12 @@ def createLinePlot(x_vars, y_vars):
 
 def createScatterPlot(x_vars, y_vars):
     global df
-    plt.plot(x_vars, y_vars, marker='o')
+    plt.scatter(x_vars, y_vars, marker='o')
+    plt.show()
+
+def createBarChart(x_vars, y_vars):
+    global df
+    plt.bar(x_vars, y_vars)
     plt.show()
 
 window=tk.Tk()
@@ -96,6 +103,8 @@ plotType = ttk.Combobox(
     state="readonly",
 )
 
+variable1.bind("<<ComboboxSelected>>", createChart)
+variable2.bind("<<ComboboxSelected>>", createChart)
 plotType.bind("<<ComboboxSelected>>", createChart)
 
 
