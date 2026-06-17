@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 df=None
 variables=[]
-plotTypes=['Line plot', 'Scatter plot', 'Bar Chart']
+plotTypes=['Line plot', 'Scatter plot', 'Bar Chart', 'Pie Chart']
 chosen_variables=[]
 currentVarNumber=0
 
@@ -65,7 +65,9 @@ def createChart():
         case 'Line plot':
             createLinePlot(x_vars, y_vars)
         case 'Bar Chart':
-            createLinePlot(x_vars, y_vars)
+            createBarChart(x_vars, y_vars)
+        case 'Pie Chart':
+            createPieChart(x_vars, y_vars)
         case _:
             createScatterPlot(x_vars, y_vars)
             
@@ -106,13 +108,50 @@ def createScatterPlot(x_vars, y_vars):
 
 def createBarChart(x_vars, y_vars):
     global df
-    plt.bar(x_vars, y_vars)
+    global currentVarNumber
+    global chosen_variables
+
+    tickLabels=()
+
+    for i in range(0, len(x_vars)):
+        addedElement=(str(x_vars[i]),)
+        tickLabels=tickLabels+addedElement
+        print(tickLabels)
+
+    dictionary = {}
+    for o in y_vars:
+        values=()
+        for p in range(0, len(o)):
+            addedElement=(float(o[p]),)
+            values=values+addedElement
+        dictionary[o[0]]=values
+    
+    fig, ax = plt.subplots(layout='constrained')
+    res=ax.grouped_bar(dictionary, tick_labels=tickLabels, group_spacing=1)
+    for container in res.bar_containers:
+        ax.bar_label(container, padding=3)
+    
+    plt.show()
+
+
+def createPieChart(x_vars, y_vars):
+    global df
+
+    labels=x_vars
+    sizes=y_vars[0]
+    fig, ax=plt.subplots()
+    ax.pie(sizes, labels=labels, autopct='%1.1f%%')
+
     plt.show()
 
 def updateVarNumber(event):
+    if variableNumberScrblr.get()=='':
+        return
+    
     number = int(variableNumberScrblr.get())
     global currentVarNumber
     global chosen_variables
+
     if currentVarNumber==number or number =='':
         return
     if currentVarNumber<number:
@@ -153,6 +192,10 @@ def updateInterface():
 
     createChartBtn.pack(side='right')
 
+def plotTypeChanged(event):
+    if plotType.get()=='Pie Chart':
+        variableNumberScrblr.set('2')
+        updateVarNumber(event)
     
 window=tk.Tk()
 window.geometry("750x750")
@@ -180,6 +223,7 @@ plotType = ttk.Combobox(
     values=plotTypes,
     state="readonly",
 )
+plotType.bind("<<ComboboxSelected>>", plotTypeChanged)
 
 createChartBtn=tk.Button(baseSettingsBar, text='Create Chart', command=createChart)
 
